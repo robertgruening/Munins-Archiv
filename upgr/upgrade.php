@@ -47,25 +47,40 @@ function Main()
 
     echo "3. Datenbankaktualisierung\r\n";
     echo "Im Folgenden werden alle Fundstellen um geografische Positionen erweitert. \r\n";
-    readline("Weiter mit [EINGABE] ...");
-    echo "\r\n";
-    UpgradeFundstellen($config);
-    readline("Weiter mit [EINGABE] ...");
-    echo "\r\n";
+	if (readline("Weiter mit \"ja\": ") == "ja")
+	{
+		echo "\r\n";
+		UpgradeFundstellen($config);
+		readline("Weiter mit [EINGABE] ...");
+	}
+	echo "\r\n";
 
     echo "Im Folgenden werden alle Ablagen um eine GUID (UUID) erweitert.\r\n";
-    readline("Weiter mit [EINGABE] ...");
-    echo "\r\n";
-    UpgradeAblagen($config);
-    readline("Weiter mit [EINGABE] ...");
-    echo "\r\n";
+	if (readline("Weiter mit \"ja\": ") == "ja")
+	{
+		echo "\r\n";
+		UpgradeAblagen($config);
+		readline("Weiter mit [EINGABE] ...");
+	}
+	echo "\r\n";
 
     echo "Im Folgenden werden alle Orte gelöscht. Orte werden um eine Kategorie erweitert.\r\n";
-    readline("Weiter mit [EINGABE] ...");
-    echo "\r\n";
-    UpgradeOrte($config);
-    readline("Weiter mit [EINGABE] ...");
-    echo "\r\n";
+	if (readline("Weiter mit \"ja\": ") == "ja")
+	{
+		echo "\r\n";
+		UpgradeOrte($config);
+		readline("Weiter mit [EINGABE] ...");
+	}
+	echo "\r\n";
+
+    echo "Im Folgenden wird die Benutzerverwaltung angelgt. Hierzu gehört das Merken (Bookmarken) und Bewerten (5-Sterne-Bewertung) von Funden.\r\n";
+	if (readline("Weiter mit \"ja\": ") == "ja")
+	{
+		echo "\r\n";
+		CreateUserManagement($config);
+		readline("Weiter mit [EINGABE] ...");
+	}
+	echo "\r\n";
 
     echo "Beende Upgrade von Version 1.1 auf Version 1.2.\r\n";
 }
@@ -207,6 +222,122 @@ function CreateTableFundstelle($config)
 	    	else
 	    	{
 	    		echo "Tabelle \"Fundstelle\" ist angelegt.\r\n";
+	    	}
+    	}
+
+    	$mysqli->close();
+    }
+}
+
+function CreateTableUser($config)
+{
+    if (DoesTableExist($config, "User"))
+    {
+        echo "Die Tabelle \"User\" existiert bereits.\r\n";
+    }
+    else
+    {
+    	$mysqli = new mysqli($config["MYSQL_HOST"], $config["MYSQL_BENUTZER"], $config["MYSQL_KENNWORT"], $config["MYSQL_DATENBANK"]);
+
+    	if (!$mysqli->connect_errno)
+    	{
+	    	$mysqli->set_charset("utf8");
+	    	$ergebnis = $mysqli->query("
+				CREATE TABLE IF NOT EXISTS `User` (
+  					`Id` int(11) NOT NULL AUTO_INCREMENT,
+					`FirstName` varchar(20) NOT NULL,
+					`LastName` varchar(30) NOT NULL,
+					`Guid` varchar(36) DEFAULT NULL,
+					PRIMARY KEY (`Id`),
+					UNIQUE KEY `IndexUserGuid` (`Guid`)
+				);
+	    	");
+
+	    	if ($mysqli->errno)
+	    	{
+	    		echo "Beim Anlegen der Tabelle \"User\" ist ein Fehler aufgetreten!\r\n";
+	    		echo $mysqli->errno.": ".$mysqli->error."\r\n";
+	    	}
+	    	else
+	    	{
+	    		echo "Tabelle \"User\" ist angelegt.\r\n";
+	    	}
+    	}
+
+    	$mysqli->close();
+    }
+}
+
+function CreateTableBookmark($config)
+{
+    if (DoesTableExist($config, "Bookmark"))
+    {
+        echo "Die Tabelle \"Bookmark\" existiert bereits.\r\n";
+    }
+    else
+    {
+    	$mysqli = new mysqli($config["MYSQL_HOST"], $config["MYSQL_BENUTZER"], $config["MYSQL_KENNWORT"], $config["MYSQL_DATENBANK"]);
+
+    	if (!$mysqli->connect_errno)
+    	{
+	    	$mysqli->set_charset("utf8");
+	    	$ergebnis = $mysqli->query("
+				CREATE TABLE IF NOT EXISTS `Bookmark` (
+  					`User_Id` int(11) NOT NULL,
+					`Fund_Id` int(11) NOT NULL,
+					PRIMARY KEY (`User_Id`, `Fund_Id`),
+					FOREIGN KEY (`User_Id`) REFERENCES `User`(`Id`),
+					FOREIGN KEY (`Fund_Id`) REFERENCES `Fund`(`Id`)
+				);
+	    	");
+
+	    	if ($mysqli->errno)
+	    	{
+	    		echo "Beim Anlegen der Tabelle \"Bookmark\" ist ein Fehler aufgetreten!\r\n";
+	    		echo $mysqli->errno.": ".$mysqli->error."\r\n";
+	    	}
+	    	else
+	    	{
+	    		echo "Tabelle \"Bookmark\" ist angelegt.\r\n";
+	    	}
+    	}
+
+    	$mysqli->close();
+    }
+}
+
+function CreateTableRating($config)
+{
+    if (DoesTableExist($config, "Rating"))
+    {
+        echo "Die Tabelle \"Rating\" existiert bereits.\r\n";
+    }
+    else
+    {
+    	$mysqli = new mysqli($config["MYSQL_HOST"], $config["MYSQL_BENUTZER"], $config["MYSQL_KENNWORT"], $config["MYSQL_DATENBANK"]);
+
+    	if (!$mysqli->connect_errno)
+    	{
+	    	$mysqli->set_charset("utf8");
+	    	$ergebnis = $mysqli->query("
+				CREATE TABLE IF NOT EXISTS `Rating` (
+  					`User_Id` int(11) NOT NULL,
+					`Fund_Id` int(11) NOT NULL,
+					`Rating` tinyint(1) NOT NULL,
+					PRIMARY KEY (`User_Id`, `Fund_Id`),
+					FOREIGN KEY (`User_Id`) REFERENCES `User`(`Id`),
+					FOREIGN KEY (`Fund_Id`) REFERENCES `Fund`(`Id`)
+				);
+	    	");
+
+	    	if ($mysqli->errno)
+	    	{
+	    		echo "Beim Anlegen der Tabelle \"Rating\" ist ein Fehler aufgetreten!\r\n";
+	    		echo $mysqli->errno.": ".$mysqli->error."\r\n";
+	    	}
+	    	else
+	    	{
+	    		echo "Tabelle \"Rating\" ist angelegt.\r\n";
 	    	}
     	}
 
@@ -587,6 +718,15 @@ function UpgradeOrte($config)
     InsertOrtCategoriesToTableOrtCategory($config);
 
     InsertColumnCategoryIdInTableOrt($config);    
+}
+#endregion
+
+#region create user management
+function CreateUserManagement($config)
+{
+	CreateTableUser($config);
+	CreateTableBookmark($config);
+	CreateTableRating($config);
 }
 #endregion
 #endregion

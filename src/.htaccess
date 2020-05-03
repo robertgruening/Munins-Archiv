@@ -5,7 +5,7 @@ RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
 
 RewriteRule "^api/Services/(\w+)/?$"                                    "api/Services/$1.php"                           [NC,L]
 RewriteRule "^api/Services/(\w+)/([\d]+)/?$"                            "api/Services/$1.php?Id=$2"                     [NC,L]
-RewriteRule "^api/Services/Ablage/([\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12})/?$"  "api/Services/Ablage.php?Guid=$1"                   [NC,L]
+RewriteRule "^api/Services/(\w+)/([\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12})/?$"  "api/Services/$1.php?Guid=$2"                   [NC,L]
 
 RewriteRule	"^api/Services/Sitemap/?$"									"api/Services/Sitemap.php"						[NC,L]
 RewriteRule	"^api/Services/Sitemap/([\w]+)/?$"							"api/Services/Sitemap.php?PageName=$1"			[NC,L]
