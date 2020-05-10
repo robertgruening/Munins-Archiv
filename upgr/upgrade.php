@@ -268,11 +268,11 @@ function CreateTableUser($config)
     }
 }
 
-function CreateTableBookmark($config)
+function CreateTableUserBookmarkedFund($config)
 {
-    if (DoesTableExist($config, "Bookmark"))
+    if (DoesTableExist($config, "User_BookmarkedFund"))
     {
-        echo "Die Tabelle \"Bookmark\" existiert bereits.\r\n";
+        echo "Die Tabelle \"User_BookmarkedFund\" existiert bereits.\r\n";
     }
     else
     {
@@ -282,7 +282,7 @@ function CreateTableBookmark($config)
     	{
 	    	$mysqli->set_charset("utf8");
 	    	$ergebnis = $mysqli->query("
-				CREATE TABLE IF NOT EXISTS `Bookmark` (
+				CREATE TABLE IF NOT EXISTS `User_BookmarkedFund` (
   					`User_Id` int(11) NOT NULL,
 					`Fund_Id` int(11) NOT NULL,
 					PRIMARY KEY (`User_Id`, `Fund_Id`),
@@ -293,12 +293,12 @@ function CreateTableBookmark($config)
 
 	    	if ($mysqli->errno)
 	    	{
-	    		echo "Beim Anlegen der Tabelle \"Bookmark\" ist ein Fehler aufgetreten!\r\n";
+	    		echo "Beim Anlegen der Tabelle \"User_BookmarkedFund\" ist ein Fehler aufgetreten!\r\n";
 	    		echo $mysqli->errno.": ".$mysqli->error."\r\n";
 	    	}
 	    	else
 	    	{
-	    		echo "Tabelle \"Bookmark\" ist angelegt.\r\n";
+	    		echo "Tabelle \"User_BookmarkedFund\" ist angelegt.\r\n";
 	    	}
     	}
 
@@ -306,11 +306,11 @@ function CreateTableBookmark($config)
     }
 }
 
-function CreateTableRating($config)
+function CreateTableUserRatedFund($config)
 {
-    if (DoesTableExist($config, "Rating"))
+    if (DoesTableExist($config, "User_RatedFund"))
     {
-        echo "Die Tabelle \"Rating\" existiert bereits.\r\n";
+        echo "Die Tabelle \"User_RatedFund\" existiert bereits.\r\n";
     }
     else
     {
@@ -320,11 +320,12 @@ function CreateTableRating($config)
     	{
 	    	$mysqli->set_charset("utf8");
 	    	$ergebnis = $mysqli->query("
-				CREATE TABLE IF NOT EXISTS `Rating` (
+				CREATE TABLE IF NOT EXISTS `User_RatedFund` (
+					`Id` int (11) NOT NULL AUTO_INCREMENT,
   					`User_Id` int(11) NOT NULL,
 					`Fund_Id` int(11) NOT NULL,
 					`Rating` tinyint(1) NOT NULL,
-					PRIMARY KEY (`User_Id`, `Fund_Id`),
+					PRIMARY KEY (`Id`),
 					FOREIGN KEY (`User_Id`) REFERENCES `User`(`Id`),
 					FOREIGN KEY (`Fund_Id`) REFERENCES `Fund`(`Id`)
 				);
@@ -332,12 +333,12 @@ function CreateTableRating($config)
 
 	    	if ($mysqli->errno)
 	    	{
-	    		echo "Beim Anlegen der Tabelle \"Rating\" ist ein Fehler aufgetreten!\r\n";
+	    		echo "Beim Anlegen der Tabelle \"User_RatedFund\" ist ein Fehler aufgetreten!\r\n";
 	    		echo $mysqli->errno.": ".$mysqli->error."\r\n";
 	    	}
 	    	else
 	    	{
-	    		echo "Tabelle \"Rating\" ist angelegt.\r\n";
+	    		echo "Tabelle \"User_RatedFund\" ist angelegt.\r\n";
 	    	}
     	}
 
@@ -725,8 +726,8 @@ function UpgradeOrte($config)
 function CreateUserManagement($config)
 {
 	CreateTableUser($config);
-	CreateTableBookmark($config);
-	CreateTableRating($config);
+	CreateTableUserBookmarkedFund($config);
+	CreateTableUserRatedFund($config);
 }
 #endregion
 #endregion

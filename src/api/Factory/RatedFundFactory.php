@@ -1,11 +1,10 @@
 <?php
 include_once(__DIR__."/Factory.php");
-include_once(__DIR__."/../Model/Fund.php");
+include_once(__DIR__."/../Model/RatedFund.php");
 include_once(__DIR__."/FundAttributFactory.php");
 include_once(__DIR__."/AblageFactory.php");
 include_once(__DIR__."/KontextFactory.php");
 include_once(__DIR__."/UserFactory.php");
-include_once(__DIR__."/UserFundFactory.php");
 
 class FundFactory extends Factory
 {
@@ -14,7 +13,6 @@ class FundFactory extends Factory
     private $_ablageFactory = null;
     private $_kontextFactory = null;
     private $_userFactory = null;
-	private $_userFundRatingFactory = null;
     #endregion
 
     #region properties
@@ -52,16 +50,6 @@ class FundFactory extends Factory
 
 	    return $this->_userFactory;
     }
-
-	protected function getUserFundRatingFactory()
-	{
-		if ($this->_userFundRatingFactory == null)
-		{
-			$this->_userFundRatingFactory = new UserFundRatingFactory();
-		}
-
-		return $this->_userFundRatingFactory;
-	}
     #endregion
 
     #region constructors
@@ -115,7 +103,6 @@ class FundFactory extends Factory
         $fund->setAblage($this->getAblageFactory()->loadByFund($fund));
         $fund->setKontext($this->getKontextFactory()->loadByFund($fund));
         $fund->setFundAttribute($this->getFundAttributFactory()->loadByFund($fund));
-	$fund->setUserRatings($this->getUserFundRatingFactory()->loadByFund($fund));
 
         return $fund;
     }

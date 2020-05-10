@@ -1,46 +1,26 @@
 <?php
 include_once(__DIR__."/Factory.php");
-include_once(__DIR__."/../Model/Fund.php");
-include_once(__DIR__."/FundAttributFactory.php");
-include_once(__DIR__."/AblageFactory.php");
-include_once(__DIR__."/KontextFactory.php");
+include_once(__DIR__."/../Model/RatedFund.php");
+include_once(__DIR__."/../Model/UserRating.php");
 include_once(__DIR__."/UserFactory.php");
-include_once(__DIR__."/UserFundFactory.php");
+include_once(__DIR__."/FundFactory.php");
 
-class FundFactory extends Factory
+class UserFundRatingFactory extends Factory
 {
     #region variables
-    private $_fundAttributFactory = null;
-    private $_ablageFactory = null;
-    private $_kontextFactory = null;
+    private $_fundFactory = null;
     private $_userFactory = null;
-	private $_userFundRatingFactory = null;
     #endregion
 
     #region properties
-    protected function getFundAttributFactory()
+    protected function getFundFactory()
     {
-        return $this->_fundAttributFactory;
-    }
+	    if ($this->_fundFactory == null)
+	    {
+		    $this->_fundFactory = new FundFactory();
+	    }
 
-    protected function getAblageFactory()
-    {
-        if ($this->_ablageFactory == null)
-        {
-            $this->_ablageFactory = new AblageFactory();
-        }
-
-        return $this->_ablageFactory;
-    }
-
-    protected function getKontextFactory()
-    {
-        if ($this->_kontextFactory == null)
-        {
-            $this->_kontextFactory = new KontextFactory();
-        }
-
-        return $this->_kontextFactory;
+	    return $this->_fundFactory;
     }
 
     protected function getUserFactory()
@@ -52,22 +32,11 @@ class FundFactory extends Factory
 
 	    return $this->_userFactory;
     }
-
-	protected function getUserFundRatingFactory()
-	{
-		if ($this->_userFundRatingFactory == null)
-		{
-			$this->_userFundRatingFactory = new UserFundRatingFactory();
-		}
-
-		return $this->_userFundRatingFactory;
-	}
     #endregion
 
     #region constructors
     function __construct()
     {
-        $this->_fundAttributFactory = new FundAttributFactory();
     }
     #endregion
 

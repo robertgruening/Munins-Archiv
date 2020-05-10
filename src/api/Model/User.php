@@ -9,6 +9,7 @@ class User implements iNode, iListNode
 	public $LastName;
     	public $Guid;	
 	public $OrderNumber;
+	public $BookmarkedFunde;
     
     
     public function getId()
@@ -62,12 +63,40 @@ class User implements iNode, iListNode
 
     public function getGuid()
     {
-	    return $this->Geuid;
+	    return $this->euid;
     }
 
     public function setGuid($guid)
     {
 	    $this->Guid = $guid;
+    }
+
+    public function getBookmarkedFunde()
+    {
+	    return $this->BookmarkedFunde;
+    }
+
+    public function setBookmarkedFunde($funde)
+    {
+	$this->BookmarkedFunde = $funde;
+    }
+
+    public function addBookmarkedFund($fund)
+    {
+	    $array_push($this->BookmarkedFunde, $fund);
+    }
+
+    public function removeBookmarkedFund($bookmarkedFund)
+    {
+        for ($i = 0; $i < count($this->BookmarkedFunde); $i++)
+        {
+            if ($this->BookmarkedFunde[$i]->getId() == $bookmarkedFund->getId())
+            {
+                array_splice($this->BookmarkedFunde, $i, 1);
+                break;
+            }
+        }
+
     }
     
     function __construct()
@@ -77,5 +106,6 @@ class User implements iNode, iListNode
 	$this->LastName = null;
 	$this->Guid = null;
 	$this->OrderNumber = null;
+	$this->BookmarkedFunde = array();
     }
 }

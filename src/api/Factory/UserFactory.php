@@ -1,13 +1,15 @@
 <?php
 include_once(__DIR__."/Factory.php");
+include_once(__DIR__."/../Model/User.php");
 include_once(__DIR__."/IListFactory.php");
 include_once(__DIR__."/ListFactory.php");
-include_once(__DIR__."/../Model/User.php");
+include_once(__DIR__."/FundFactory.php");
 
 class UserFactory extends Factory implements iListFactory
 {
     #region variables
-    private $_listFactory = null;
+	private $_listFactory = null;
+	private $_fundFactory = null;
     #endregion
 
     #region properties
@@ -15,12 +17,23 @@ class UserFactory extends Factory implements iListFactory
     {
         return $this->_listFactory;
     }
+
+	protected function getFundFactory()
+	{
+		if ($this->_fundFactory == null)
+		{
+			$this->_fundFactory = new FundFactory();
+		}
+
+		return $this->_fundFactory;
+	}
+
     #endregion
 
     #region constructors
     function __construct()
     {
-        $this->_listFactory = new ListFactory($this);
+	    $this->_listFactory = new ListFactory($this);
     }
     #endregion
 
@@ -99,7 +112,8 @@ class UserFactory extends Factory implements iListFactory
         $user->setId(intval($dataSet["Id"]));
         $user->setFirstName($dataSet["FirstName"]);
         $user->setLastName($dataSet["LastName"]);
-        $user->setGuid($dataSet["Guid"]);
+	$user->setGuid($dataSet["Guid"]);
+	$user->setBookmarkedFunde($this->getFundFactory()->loadByUserAsBookmarked($user));
 
         return $user;
     }
@@ -169,11 +183,98 @@ class UserFactory extends Factory implements iListFactory
         else
         {
             $logger->debug("GUID ist nicht gesetzt!");
-        }
+	}
+
+	if (isset($object["BookmarkedFunde"]))
+	{
+		$user->setBookmarkedFunde($object["BookmarkedFunde"]);
+	}
+	else
+	{
+		$logger->debug("Gebookmarkte Funde sind nicht gesetzt!");
+	}
 
 
         return $user;
     }
+    #endregion
+
+    #region Bookmarked Funde
+        /**
+        * Synchronises the user's bookmarked Funde with the given
+        * bookmarked Funden.
+        * Returns the updated user.
+        *
+        * @param $user User to synchronise.
+        * @param array $bookmarkedFunde Bookmarked Funde to be used as new bookmarked Funde of the given user.
+        */
+        public function synchroniseBookmarkedFunde($user, array $bookmarkedFunde)
+        {
+            $mysqli = new mysqli(MYSQL_HOST, MYSQL_BENUTZER, MYSQL_KENNWORT, MYSQL_DATENBANK);
+
+            if (!$mysqli->connect_errno)
+            {
+                $mysqli->set_charset("utf8");
+                $mysqli->autocommit(false);
+                $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
+
+                $passed = true;
+                $passed = $mysqli->query($this->getSQLStatementToUnlinkBookmarkedFunde($user)) && $passed;
+
+                if (count($orte) > 0)
+                {
+                    $passed = $mysqli->query($this->getSQLStatementToLinkBookmarkedFunde($user, $bookmarkedFunde)) && $passed;
+                }
+
+                if ($passed)
+                {
+                    $mysqli->commit();
+                    $element->setBookmarkedFunde($bookmarkedFunde);
+                }
+                else
+                {
+                    $mysqli->rollback();
+                }
+            }
+
+            $mysqli->close();
+
+            return $element;
+        }
+
+        public function getSQLStatementToUnlinkBookmarkedFunde($user)
+        {
+            $statement = "DELETE FROM ".$this->getTableName()."_Bookmarked".$this->getFundFactory()->getTableName()."
+            WHERE ".$this->getTableName()."_Id = ".$user->getId().";";
+
+            return $statement;
+        }
+
+        public function getSQLStatementToLinkBookmarkedFunde($user, $bookmarkedFunde)
+        {
+            if (count($bookmarkedFunde) == 0)
+            {
+                return "";
+            }
+
+            $statement = "INSERT INTO ".$this->getTableName()."_Bookmarked".$this->getFundFactory()->getTableName()."(".$this->getTableName()."_Id,".$this->getFundFactory()->getTableName()."_Id)
+            VALUES ";
+
+            for ($i = 0; $i < count($bookmarkedFunde); $i++)
+            {
+                $statement .= "(".$user->getId().",".$bookmarkedFunde[$i]->getId().")";
+
+                if ($i + 1 < count($bookmarkedFunde))
+                {
+                    $statement .= ",";
+                }
+            }
+
+            $statement .= ";";
+
+            return $statement;
+        }
+      
     #endregion
     #endregion
 }
