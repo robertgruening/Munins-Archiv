@@ -1,6 +1,7 @@
 <?php
 include_once(__DIR__."/Factory.php");
 include_once(__DIR__."/../Model/User.php");
+include_once(__DIR__."/../Model/RatedFund.php");
 include_once(__DIR__."/IListFactory.php");
 include_once(__DIR__."/ListFactory.php");
 include_once(__DIR__."/FundFactory.php");
@@ -113,7 +114,6 @@ class UserFactory extends Factory implements iListFactory
         $user->setFirstName($dataSet["FirstName"]);
         $user->setLastName($dataSet["LastName"]);
 	$user->setGuid($dataSet["Guid"]);
-	$user->setBookmarkedFunde($this->getFundFactory()->loadByUserAsBookmarked($user));
 
         return $user;
     }
@@ -200,6 +200,11 @@ class UserFactory extends Factory implements iListFactory
     #endregion
 
     #region Bookmarked Funde
+    public function loadBookmarkedFunde($user)
+    {
+	    return $this->getFundFactory()->loadByUserAsBookmarked($user);
+    }
+
         /**
         * Synchronises the user's bookmarked Funde with the given
         * bookmarked Funden.
@@ -275,6 +280,43 @@ class UserFactory extends Factory implements iListFactory
             return $statement;
         }
       
-    #endregion
+	#endregion
+
+	#region Rated Funde
+	public function loadRatedFunde($user)
+	{
+		$ratedFunde = array();
+		$mysqli = new mysqli(MYSQL_HOST, MYSQL_BENUTZER, MYSQL_KENNWORT, MYSQL_DATENBANK);
+
+		if (!$mysqli->connect_errno)
+		{
+			$mysqli->set_charset("utf8");
+			$ergebnis = $mysqli->query($this->getSQLStatementToLoadRatedFundeByUser($user));
+
+			if (!$mysqli->errno)
+			{
+				while ($dataSet = $ergebnis->fetch_assoc())
+				{
+					$ratedFund = new RatedFund();
+					$ratedFund->setRating(intval($dataSet["Rating"]));
+					$ratedFund->setFund($this->getFundFactory()->loadById(intval($dataSet[$this->getFundFactory()->getTableName()."_Id"])));
+
+					array_push($ratedFunde, $ratedFund);
+				}
+			}
+		}
+
+		$mysqli->close();
+
+		return $ratedFunde;
+	}
+
+    protected function getSQLStatementToLoadRatedFundeByUser($user)
+    {
+        return "SELECT Rating, ".$this->getFundFactory()->getTableName()."_Id
+        FROM ".$this->getTableName()."_Rated".$this->getFundFactory()->getTableName()."
+        WHERE ".$this->getTableName()."_Id = '".$user->getId()."';";
+    }
+	#endregion
     #endregion
 }

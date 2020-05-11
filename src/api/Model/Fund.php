@@ -14,7 +14,8 @@ class Fund implements iNode
     public $FundAttribute;
     public $Ablage;
     public $Kontext;
-	public $UserRatings;    
+    public $Ratings;
+    public $Rating; 
     
     public function getId()
     {
@@ -136,44 +137,20 @@ class Fund implements iNode
         return false;
     }
     
-	public function getUserRatings()
+	public function getRatings()
     {
-        return $this->UserRatings;
+        return $this->Ratings;
     }
     
-    public function setUserRatings($userRatings)
+    public function setRatings($ratings)
     {
-        $this->UerRatings = $userRatings;
+	    $this->Ratings = $ratings;
+	    $this->Rating = $this->calculateAverage($this->Ratings);
     }
-    
-    public function addUserRating($userRating)
-    {
-        array_push($this->UserRatings, $userRating);
-    }
-    
-    public function removeUserRating($userRating)
-    {
-        for ($i = 0; $i < count($this->UserRatings); $i++)
-        {
-            if ($this->UserRatings[$i]->getUser()->getId() == $userRating->getUser()->getId())
-            {
-                array_splice($this->UserRatings, $i, 1);
-                break;
-            }
-        }
-    }
-    
-    public function containsUserRating($userRating)
-    {
-        for ($i = 0; $i < count($this->UserRatings); $i++)
-        {
-            if ($this->UserRatings[$i]->getUser()->getId() == $userRating->getUser()->->getId())
-            {
-                return true;
-            }
-        }
 
-        return false;
+    public function getRating()
+    {
+	    return $this->Rating;
     }
     
     public function getAblage()
@@ -195,6 +172,17 @@ class Fund implements iNode
     {
         $this->Kontext = $kontext;
     }
+
+    private function calculateAverage($values)
+    {
+	    if ($values == null ||
+	    	count($values) == 0)
+	    {
+		    return 0;
+	    }
+
+	    return array_sum($values) / count($values);
+    }
     
     function __construct()
     {
@@ -209,6 +197,7 @@ class Fund implements iNode
         $this->FundAttribute = array();
         $this->Ablage = null;
         $this->Kontext = null;
-		$this->UserRatings = array();
+	$this->Ratings = array();
+	$this->Rating = 0;
     }
 }

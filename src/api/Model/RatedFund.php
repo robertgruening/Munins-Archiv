@@ -41,6 +41,6 @@ class RatedFund implements iNode
     {
 	$this->Id = -1;
         $this->Fund = null;
-        $this->Rating = null;
+        $this->Rating = 0;
     }
 }
